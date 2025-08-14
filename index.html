@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ASUSH Attendance</title>
+</head>
+<body>
+  <h2>ASUSH Attendance System</h2>
+  <p id="status">Checking location...</p>
+  <input type="text" id="name" placeholder="Enter your name" style="display:none;">
+  <button id="submitBtn" style="display:none;">Submit Attendance</button>
+
+  <script>
+    const APP_SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+
+    let userLat, userLng;
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        document.getElementById('status').textContent = "Location verified. Enter your name.";
+        document.getElementById('name').style.display = "block";
+        document.getElementById('submitBtn').style.display = "block";
+      }, () => {
+        document.getElementById('status').textContent = "Location access denied.";
+      });
+    } else {
+      document.getElementById('status').textContent = "Geolocation not supported.";
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const name = document.getElementById('name').value.trim();
+      if (!name) {
+        alert("Please enter your name.");
+        return;
+      }
+
+      fetch(APP_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ name, lat: userLat, lng: userLng })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+      })
+      .catch(err => {
+        alert("Error: " + err.message);
+      });
+    });
+  </script>
+</body>
+</html>
